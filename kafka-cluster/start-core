@@ -1,0 +1,3 @@
+#!/bin/sh
+
+docker-compose up -d zookeeper broker-1 broker-2 broker-2 schema-registry

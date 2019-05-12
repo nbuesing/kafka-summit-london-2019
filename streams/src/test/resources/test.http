@@ -1,0 +1,20 @@
+POST {{host}}/api/v1/commit?forceFailure=false&delay=1
+Content-Type: application/json
+
+{"example":"happy_path"}
+
+###
+
+POST {{host}}/api/v1/commit?forceFailure=true&delay=1
+Content-Type: application/json
+
+{"example":"exception_thrown"}
+
+###
+
+POST {{host}}/api/v1/commit?forceFailure=false&delay=260
+Content-Type: application/json
+
+{"example":"too_long"}
+
+###

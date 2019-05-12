@@ -1,0 +1,3 @@
+#!/bin/sh
+
+confluent load opensky -d connect-standalone.properties && confluent && confluent log connect -f

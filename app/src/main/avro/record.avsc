@@ -1,0 +1,39 @@
+{
+  "namespace": "com.objectpartners.buesing.avro",
+  "name": "Record",
+  "type": "record",
+  "fields": [
+    {
+      "name": "origin",
+      "type": [ "null", "string" ],
+      "default" : null
+    },
+    {
+      "name": "aircraft",
+      "type": "com.objectpartners.buesing.avro.Aircraft"
+    },
+    {
+      "name": "location",
+      "type": "com.objectpartners.buesing.avro.Location"
+    },
+    {
+      "name": "altitude",
+      "type": [ "null", "double" ],
+      "default" : null
+    },
+    {
+       "name": "onGround",
+       "type": "boolean"
+    },
+    {
+      "name": "velocity",
+      "type": [ "null", "double" ],
+      "default" : null
+    },
+    {
+      "name": "verticalRate",
+      "type": [ "null", "double" ],
+      "default" : null
+    }
+  ]
+}

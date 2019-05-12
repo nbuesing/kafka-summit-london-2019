@@ -1,0 +1,54 @@
+server:
+  port:
+    8443
+  ssl:
+    enabled: false
+http:
+  port:
+     8080
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  jackson:
+    serialization:
+      # Write our timestamps more sensibly
+      write_dates_as_timestamps: false
+    default-property-inclusion: non_absent
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      ack-mode: MANUAL
+    consumer:
+      group-id: sampleApplication1
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: http://localhost:8081
+        # otherwise generic record will be used by conser
+        specific.avro.reader: true
+      enable-auto-commit: false
+    producer:
+      client-id: springbootapp_prod
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema.registry.url: http://localhost:8081
+
+kafka:
+  streams:
+    schema-registry-url: http://localhost:8081
+    bootstrap-servers: localhost:9092
+    application-id: testStreams2
+
+info:
+  app:
+    encoding: FOO
+    java:
+      source: 1.8
+      target: 1.8
+
+logging:
+  level:
+    org.apache.kafka.clients: INFO

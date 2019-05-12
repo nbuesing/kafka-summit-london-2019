@@ -1,0 +1,52 @@
+.nation {
+    fill: none;
+    fill: #ddd;
+    stroke-linejoin: round;
+    stroke: black;
+    z-index: -1;
+}
+
+.states {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+    z-index: 0;
+}
+
+.red {
+    fill: #f00;
+    /*visibility: hidden;*/
+}
+
+.blue {
+    fill: #00f;
+    stroke-width: 1px;
+    visibility: hidden;
+}
+
+.airport {
+    fill: #333;
+    stroke-width: 1px;
+}
+
+.connection {
+    fill: none;
+    stroke: rgb(0, 255, 0);
+    stroke-width: 1.5;
+    visibility: hidden;
+}
+
+.allconnection {
+    fill: none;
+    stroke: rgb(0, 128, 128);
+    stroke-width: 1;
+    visibility: hidden;
+}
+
+.grid {
+    fill: none;
+    stroke: purple;
+    stroke-width: .5;
+    stroke-opacity: .5;
+    z-index: 10;
+}

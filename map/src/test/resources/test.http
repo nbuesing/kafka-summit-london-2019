@@ -1,0 +1,3 @@
+GET {{host}}/airport?latitude=44.880&longitude=-93.217
+
+###

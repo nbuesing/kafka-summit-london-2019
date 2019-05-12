@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <script src="../d3/d3.v4.min.js"></script>
+    <script src="../d3/topojson.v2.min.js"></script>
+    <script>
+        var url = window.location.href.split('?')[0];
+        var urlParams = new URLSearchParams(window.location.search);
+
+        function handleClick(cb, className) {
+            var state = 'hidden';
+            if (cb.checked) {
+                state = 'visible';
+
+                d3.json("data/red", function(red) {
+                    drawPlanes(red);
+                    // Now use response to do some d3 magic
+                });
+            } else {
+                clearPlanes();
+            }
+
+            // var elements = document.getElementsByClassName(className);
+            // for (var i = 0; i < elements.length; i++) {
+            //     elements[i].style.visibility = state;
+            // }
+        }
+
+        function transponder(cb, className) {
+            d3.json("data/single/" + cb.value, function(red) {
+                drawPlanes(red);
+                // Now use response to do some d3 magic
+            });
+        }
+    </script>
+</head>
+<body>
+<label><input type='checkbox' onclick='handleClick(this, "red");'>Red Team</label>
+<label><input type='checkbox' onclick='handleClick(this, "airport");'>Nearest Airport</label>
+<label><input type='textbox' onchange='transponder(this, "red");'>Flight</label>
+<br/>
+<br/>
+<svg width="960" height="600"></svg>
+<script>
+
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    var projection = d3.geoAlbersUsa().scale(1280).translate([480, 300]);
+    var path = d3.geoPath();
+
+    d3.queue()
+        .defer(d3.json, "us-10m.v1.json")
+       // .defer(d3.json, "data/red")
+        .defer(d3.json, "data/airportsCount")
+        .await(ready);
+
+    function drawPlanes(red) {
+
+        svg.selectAll("circle.red")
+            .data(red)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "red")
+            .attr("name", function (d) {
+                return (d.properties != null) ? ((d.properties.callsign !=null) ? d.properties.callsign : 'na') : null;
+            })
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            });
+
+        svg.selectAll("text.red")
+            .data(red)
+            .enter()
+            .append("text")
+            .attr("class", "red")
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "5px")
+            .text(function (d) {
+                return (d.properties != null) ? ((d.properties.callsign !=null) ? d.properties.callsign : 'na') : null;
+            });
+
+    }
+
+    function clearPlanes() {
+
+       // alert( svg.selectAll("circle.red").size());
+
+        svg.selectAll("circle.red").remove();
+        svg.selectAll("text.red").remove();
+    }
+
+    function ready(error, us, airports) {
+        if (error) throw error;
+
+        svg.append("path")
+            .datum(topojson.feature(us, us.objects.nation))
+            .attr("class", "nation")
+            .attr("d", path);
+
+        svg.append("path")
+            .datum(topojson.mesh(us, us.objects.states, function (a, b) {
+                return a !== b;
+            }))
+            .attr("class", "states")
+            .attr("d", path);
+
+
+        // svg.selectAll("circles.points.red")
+        //     .data(red)
+        //     .enter()
+        //     .append("circle")
+        //     .attr("r", 1)
+        //     .attr("class", "red")
+        //     .attr("name", function (d) {
+        //         return (d.properties != null) ? ((d.properties.callsign !=null) ? d.properties.callsign : 'na') : null;
+        //     })
+        //     .attr("transform", function (d) {
+        //         return "translate(" + projection(d.coordinates) + ")";
+        //     });
+
+        svg.selectAll("circle.points")
+            .data(airports)
+            .enter()
+            .append("circle")
+            .attr("r", 2)
+            .attr("class", "airport")
+            .attr("transform", function (d) {
+                return "translate(" + projection([d.longitude, d.latitude]) + ")";
+            });
+
+        svg.selectAll("text")
+            .data(airports)
+            .enter()
+            .append("text")
+            .attr("class", "airport")
+            .attr("transform", function (d) {
+                return "translate(" + projection([d.longitude, d.latitude]) + ")";
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "5px")
+            .text(function (d) {
+                return d.name + "(" + d.count + ")";
+            });
+
+    }
+</script>
+</body>
+</html>

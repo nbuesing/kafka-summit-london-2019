@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/main.css">
+<script src="d3/d3.v4.min.js"></script>
+<script src="d3/topojson.v2.min.js"></script>
+<script>
+
+    var url = window.location.href.split('?')[0];
+    var urlParams = new URLSearchParams(window.location.search);
+    var slideNumber =  urlParams.get('slide') != null ? parseInt(urlParams.get('slide')) : 0;
+
+    function nextSlide() {
+        window.location = url + "?slide=" + (slideNumber + 1);
+    }
+
+    function previousSlide() {
+        if (slideNumber == 0) {
+            return;
+        }
+        window.location = url + "?slide=" + (slideNumber - 1);
+    }
+
+</script>
+</head>
+<body>
+<button type="button" onclick="previousSlide()">Previous</button>
+<button type="button" onclick="nextSlide()">Next</button>
+<br/>
+<svg width="960" height="600"></svg>
+
+<script>
+    var projection = d3.geoEquirectangular();
+    var path = d3.geoPath()
+        .projection(projection);
+    var graticule = d3.geoGraticule();
+    d3.json("world-50m.v1.json", function(error, world) {
+        svg.selectAll('path')
+            .data(graticule.lines())
+            .enter()
+            .append('path')
+            .attr("stroke","steelblue")
+            .attr("fill","none")
+            .attr("stroke-width","2")
+            .attr("d", path);
+        svg.insert("path", "path")
+            .datum(topojson.feature(world, world.objects.land))
+            .attr("class", "land")
+            .attr("d", path)
+            .attr("fill","#ed6d3d")
+            .attr("stroke","black")
+            .attr("stroke-width","1")
+    });
+</script>
+
+</body>
+</html>

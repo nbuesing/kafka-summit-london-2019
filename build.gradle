@@ -1,0 +1,27 @@
+
+
+allprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'groovy'
+    apply plugin: 'idea'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    idea{
+        module{
+            inheritOutputDirs = false
+            outputDir = compileJava.destinationDir
+            testOutputDir = compileTestJava.destinationDir
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url "http://packages.confluent.io/maven/"
+        }
+    }
+}

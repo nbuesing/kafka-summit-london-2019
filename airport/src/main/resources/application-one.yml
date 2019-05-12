@@ -1,0 +1,6 @@
+server:
+  port:
+    9081
+
+kafka:
+  application-server: localhost:9081

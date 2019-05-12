@@ -1,0 +1,6 @@
+{
+   "namespace": "com.objectpartners.buesing.avro",
+   "name" : "Action",
+   "type" : "enum",
+   "symbols" : [ "REQUEST", "RESPONSE" ]
+}

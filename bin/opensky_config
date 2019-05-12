@@ -1,0 +1,6 @@
+#!/bin/sh
+
+#sudo mkdir -p /usr/local/confluent/share/java/kafka-connect-opensky
+
+cp connector/build/libs/connector-all.jar /usr/local/confluent/share/java/kafka-connect-opensky
+

@@ -1,0 +1,10 @@
+rootProject.name = 'blog'
+
+include 'common'
+include 'udf'
+include 'connector'
+include 'geolocation'
+include 'map'
+include 'app'
+include 'streams'
+include 'airport'

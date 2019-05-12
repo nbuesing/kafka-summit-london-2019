@@ -1,0 +1,55 @@
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
+
+//buildscript {
+//    dependencies {
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//        classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_version"
+//    }
+//}
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "http://packages.confluent.io/maven/"
+    }
+}
+
+
+dependencies {
+
+    compile project(':common')
+
+    compile group: 'io.confluent.ksql', name: 'ksql-udf', version: ksql_udf_version
+
+    compile group: 'com.netflix.feign', name: 'feign-core', version: feign_version
+    compile group: 'com.netflix.feign', name: 'feign-jackson', version: feign_version
+    
+    compile group: 'com.univocity', name: 'univocity-parsers', version: univocity_parsers_version
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+}
+
+shadowJar() {
+    dependsOn clean
+    dependencies {
+        // exclude dependencies provided in the kafka connect classpath
+        exclude dependency("org.apache.kafka:connect-api:$kafka_version")
+        exclude dependency("org.apache.kafka:kafka-clients:$kafka_version")
+        exclude dependency('net.jpountz.lz4:.*:.*')
+        exclude dependency('org.xerial.snappy:.*:.*')
+        exclude dependency('org.slf4j:.*:.*')
+
+        // the stream module shouldn't be packaged up with connector
+        exclude(project(':app'))
+    }
+}

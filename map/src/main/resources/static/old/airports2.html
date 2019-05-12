@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="d3/d3.v4.min.js"></script>
+    <script src="d3/topojson.v2.min.js"></script>
+    <script>
+        var url = window.location.href.split('?')[0];
+        var urlParams = new URLSearchParams(window.location.search);
+
+
+        function handleFlights(cb) {
+            if (cb.checked) {
+                var datetime = document.getElementById('window').value;
+                d3.json("data/flights?datetime=" + datetime, function (data) {
+                    drawPlanes(data);
+                });
+            } else {
+                clearPlanes();
+            }
+        }
+
+        function handleAirports(cb, method) {
+
+            var datetime = document.getElementById('window').value;
+
+            var url = "data/airports?method=" + method + "&datetime=" + datetime;
+
+            if (cb.checked) {
+                d3.json(url, function (data) {
+                    drawAirports(data);
+                });
+            } else {
+                clearAirports();
+            }
+        }
+
+        function transponder(cb) {
+            d3.json("data/single/" + cb.value, function (red) {
+                drawPlanes(red);
+                // Now use response to do some d3 magic
+            });
+        }
+
+
+        window.addEventListener("load", function() {
+            var now = new Date();
+            var year = now.getUTCFullYear();
+            var month = now.getUTCMonth() + 1;
+            var day = now.getUTCDate();
+            var hour = now.getUTCHours();
+            var minute = Math.floor(now.getUTCMinutes() / 5) * 5;
+            var localDatetime = year + "-" +
+                (month < 10 ? "0" + month.toString() : month) +
+                "-" +
+                (day < 10 ? "0" + day.toString() : day) +
+                "T" +
+                (hour < 10 ? "0" + hour.toString() : hour) +
+                ":" +
+                (minute < 10 ? "0" + minute.toString() : minute) +
+                ":00";
+            document.getElementById("window").value = localDatetime;
+        });
+    </script>
+</head>
+<body>
+<input id="window" name="window" type="datetime-local">
+<label><input type='checkbox' onclick='handleFlights(this);'>Red Team</label>
+<label><input type='checkbox' onclick='handleAirports(this,"aggregate");'>Nearest Airport</label>
+<label><input type='checkbox' onclick='handleAirports(this,"suppressed");'>Nearest Airport (suppressed)</label>
+<!--<label><input type='textbox' onchange='transponder(this);'>Flight</label>-->
+<br/>
+<br/>
+<script src="d3/d3.v4.min.js"></script>
+<script src="d3/topojson.v2.min.js"></script>
+
+<!--<script src = "https://d3js.org/d3-color.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-dispatch.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-ease.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-interpolate.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-selection.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-timer.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-transition.v1.min.js"></script>-->
+<!--<script src = "https://d3js.org/d3-drag.v1.min.js"></script>-->
+<script src = "https://d3js.org/d3-zoom.v1.min.js"></script>
+
+<script>
+
+    var width = 1200,
+        height = 700,
+        rotate = 60,        // so that [-60, 0] becomes initial center of projection
+        maxlat = 83;        // clip northern and southern poles (infinite in mercator)
+
+    var projection = d3.geoMercator()
+        .rotate([rotate, 0])
+        .scale(1)           // we'll scale up to match viewport shortly.
+        .translate([width / 2, height / 2]);
+
+    // find the top left and bottom right of current projection
+    function mercatorBounds(projection, maxlat) {
+        var yaw = projection.rotate()[0],
+            xymax = projection([-yaw + 180 - 1e-6, -maxlat]),
+            xymin = projection([-yaw - 180 + 1e-6, maxlat]);
+
+        return [xymin, xymax];
+    }
+
+    // set up the scale extent and initial scale for the projection
+    var b = mercatorBounds(projection, maxlat),
+        s = width / (b[1][0] - b[0][0]),
+        scaleExtent = [s, 10 * s];
+
+    projection
+        .scale(scaleExtent[0]);
+
+    var path = d3.geoPath()
+        .projection(projection);
+
+    var svg = d3.selectAll('body')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+    ;//     .call(zoom);
+
+
+    d3.queue()
+        .defer(d3.json, "world-50m.v1.json")
+        .defer(d3.json, "slides/grid")
+        .await(ready);
+
+    function ready(error, world, grid) {
+
+        svg.selectAll('path.nation')
+            .data(topojson.feature(world, world.objects.countries).features)
+            .enter()
+            .append('path')
+            .attr("class", "nation")
+
+        svg.selectAll("path.grid")
+            .data(grid)
+            .enter()
+            .append("path")
+            .attr("class", "grid")
+            .attr("d", path);
+
+        redraw();       // update path data
+    }
+
+    // track last translation and scale event we processed
+    var tlast = [0, 0],
+        slast = null;
+
+    function redraw() {
+        // if (d3.event) {
+        //     var scale = d3.event.scale,
+        //         t = d3.event.translate;
+        //
+        //     // if scaling changes, ignore translation (otherwise touch zooms are weird)
+        //     if (scale != slast) {
+        //         projection.scale(scale);
+        //     } else {
+        //         var dx = t[0] - tlast[0],
+        //             dy = t[1] - tlast[1],
+        //             yaw = projection.rotate()[0],
+        //             tp = projection.translate();
+        //
+        //         // use x translation to rotate based on current scale
+        //         projection.rotate([yaw + 360. * dx / width * scaleExtent[0] / scale, 0, 0]);
+        //         // use y translation to translate projection, clamped by min/max
+        //         var b = mercatorBounds(projection, maxlat);
+        //         if (b[0][1] + dy > 0) dy = -b[0][1];
+        //         else if (b[1][1] + dy < height) dy = height - b[1][1];
+        //         projection.translate([tp[0], tp[1] + dy]);
+        //     }
+        //     // save last values.  resetting zoom.translate() and scale() would
+        //     // seem equivalent but doesn't seem to work reliably?
+        //     slast = scale;
+        //     tlast = t;
+        // }
+
+        svg.selectAll('path')       // re-project path data
+            .attr('d', path);
+    }
+
+
+    function drawPlanes(data) {
+        svg.selectAll("circle.red")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "red")
+            .attr("name", function (d) {
+                return (d.properties != null) ? ((d.properties.callsign != null) ? d.properties.callsign : 'na') : null;
+            })
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            });
+    }
+
+    function clearPlanes() {
+        // alert( svg.selectAll("circle.red").size());
+        svg.selectAll("circle.red").remove();
+        svg.selectAll("text.red").remove();
+    }
+
+    function drawAirports(data) {
+
+        svg.selectAll("circle.airport")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "airport")
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            });
+
+        svg.selectAll("text.airport")
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("class", "airport")
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "4px")
+            .text(function (d) {
+                return d.properties.label + "(" + d.properties.count + ")";
+            });
+    }
+
+    function clearAirports() {
+        svg.selectAll("circle.airport").remove();
+        svg.selectAll("text.airport").remove();
+    }
+
+
+    // //
+    // // ZOOM
+    // //
+    //
+    // var zoom = d3.zoom()
+    //     .scaleExtent([1, 40])
+    //     .translateExtent([[-100, -100], [width + 90, height + 100]])
+    //     .on("zoom", zoomed);
+    //
+    // var x = d3.scaleLinear()
+    //     .domain([-1, width + 1])
+    //     .range([-1, width + 1]);
+    //
+    // var y = d3.scaleLinear()
+    //     .domain([-1, height + 1])
+    //     .range([-1, height + 1]);
+    //
+    // d3.select("button")
+    //     .on("click", resetted);
+    //
+    // svg.call(zoom);
+    //
+    // function zoomed() {
+    //     svg.attr("transform", d3.event.transform);
+    //    // gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+    //   //  gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+    // }
+    //
+    // function resetted() {
+    //     svg.transition()
+    //         .duration(750)
+    //         .call(zoom.transform, d3.zoomIdentity);
+    // }
+
+</script>
+</body>
+</html>

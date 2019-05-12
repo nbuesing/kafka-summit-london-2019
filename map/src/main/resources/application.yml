@@ -1,0 +1,40 @@
+server:
+  port:
+    9082
+  ssl:
+    enabled: false
+
+grid:
+  size: 3.0
+
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+  kafka:
+    bootstrap-servers: localhost:19092
+    listener:
+      ack-mode: MANUAL
+    consumer:
+      group-id: demo-map
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      properties:
+        schema.registry.url: http://localhost:8081
+        # otherwise generic record is used
+        specific.avro.reader: true
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+
+info:
+  app:
+    encoding: FOO
+    java:
+      source: 1.8
+      target: 1.8
+
+logging:
+  level:
+    org.apache.kafka.clients: INFO

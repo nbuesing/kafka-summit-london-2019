@@ -1,0 +1,88 @@
+plugins {
+    id 'org.springframework.boot' version '2.0.8.RELEASE'
+    id 'com.commercehub.gradle.plugin.avro' version '0.9.0'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group = 'com.objectpartners.buesing'
+description = 'airport'
+
+dependencies {
+    compile project(':common')
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "http://packages.confluent.io/maven/"
+    }
+}
+
+avro {
+    createSetters = true
+    fieldVisibility = "PRIVATE"
+
+}
+
+dependencies {
+    //spring dependencies leverages io.spring.dependency-management plugin for versions
+    compile group: 'org.springframework.boot', name: 'spring-boot'
+    compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    //compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+    //compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+    //compile group: 'org.springframework.boot', name: 'spring-boot-devtools'
+
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: kafka_version
+    compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafka_version
+    compile group: 'org.apache.kafka', name: 'connect-api', version: kafka_version
+    compile group: 'org.apache.kafka', name: 'connect-json', version: kafka_version
+
+    compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluent_io_version
+    compile group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluent_io_version
+    compile group: 'io.confluent', name: 'kafka-schema-registry-client', version: confluent_io_version
+
+    compile group: 'org.apache.avro', name: 'avro', version: avro_version
+    
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: apache_commons_version
+
+    compile group: 'com.netflix.feign', name: 'feign-core', version: feign_version
+    compile group: 'com.netflix.feign', name: 'feign-jackson', version: feign_version
+
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jackson_version
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jackson_version
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jackson_version
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jackson_version
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: jackson_version
+    
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+}
+
+springBoot {
+    buildInfo()
+}
+
+bootRun {
+    jvmArgs = [
+            '-Xdebug'
+            ,'-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006',
+    ]
+
+    args = [
+            '--spring.profiles.active=${INSTANCE}'
+    ]
+}

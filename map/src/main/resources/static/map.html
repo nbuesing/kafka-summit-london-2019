@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>D3 World Map Template | TechSlides</title>
+<style>
+
+    .country:hover {
+        stroke: #fff;
+        stroke-width: 1.5px;
+    }
+
+    .text {
+        font-size: 10px;
+        text-transform: capitalize;
+    }
+
+    #container {
+        margin: 10px 10px 0px 10px;
+        border: 2px solid #000;
+        border-radius: 5px;
+        height: 100%;
+        overflow: hidden;
+        background: #F0F8FF;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    div.tooltip {
+        color: #222;
+        background: #fff;
+        padding: .5em;
+        text-shadow: #f5f5f5 0 1px 0;
+        border-radius: 2px;
+        box-shadow: 0px 0px 2px 0px #a6a6a6;
+        opacity: 0.9;
+        position: absolute;
+    }
+
+    .graticule {
+        fill: none;
+        stroke: #bbb;
+        stroke-width: .5px;
+        stroke-opacity: .5;
+    }
+
+    .equator {
+        stroke: #ccc;
+        stroke-width: 1px;
+    }
+
+    .red {
+        fill: #f00;
+    }
+
+    .blue {
+        fill: #00f;
+    }
+
+    .connection {
+        fill: none;
+        stroke: rgb(50, 150, 50);
+        stroke-width: .5;
+    }
+
+    .grid {
+        fill: none;
+        stroke: purple;
+        stroke-width: .2;
+    }
+
+
+</style>
+</head>
+<body>
+
+<input id="window" name="window" type="datetime-local">
+<label>Grid<input type="checkbox" onclick='handleGrid(this);'></label>
+<label>Red<input type="checkbox" onclick='handleRedFlights(this);'></label>
+<label>Blue<input type="checkbox" onclick='handleBlueFlights(this);'></label>
+<label>Nearest<input type="checkbox" onclick='handleLines(this);'></label>
+<!--<span>&nbsp;</span>-->
+<!--<label>Nearest Airport Algorithm-->
+    <!--<label>Aggregate<input type='radio' name="airports" id="aggregate" value="aggregate" onclick='handleAirports(this);'></label>-->
+    <!--<label>Count (Suppression)<input type='radio' name="airports" value="count_suppressed" id="count_suppressed" onclick='handleAirports(this);'></label>-->
+    <!--<label>Count<input type='radio' name="airports" id="count" value="count" onclick='handleAirports(this);'></label>-->
+    <!--<label>None<input type='radio' name="airports" id="none" value="none" onclick='handleAirports(this);'></label>-->
+<!--</label>-->
+
+<div id="container"></div>
+
+<script src="http://d3js.org/d3.v4.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+
+
+<script>
+
+
+    d3.select(window).on("resize", throttle);
+
+    var zoom = d3.zoom()
+    //.extent([1,9])
+        .scaleExtent([1, 19])
+        .on("zoom", move);
+
+    var c = document.getElementById('container');
+    var width = c.offsetWidth;
+    var height = width / 2;
+
+    //offsets for tooltips
+    var offsetL = c.offsetLeft + 20;
+    var offsetT = c.offsetTop + 10;
+
+    var topo, projection, path, svg, g;
+
+    //var graticule = d3.geo.graticule();
+    var graticule = d3.geoGraticule();
+
+    var tooltip = d3.select("#container").append("div").attr("class", "tooltip hidden");
+
+    setup(width, height);
+
+
+    function setup(width, height) {
+        //projection = d3.geo.mercator()
+        projection = d3.geoMercator()
+            .translate([(width / 2), (height / 2)])
+            .scale(width / 2 / Math.PI);
+
+        //path = d3.geo.path().projection(projection);
+        path = d3.geoPath().projection(projection);
+
+        svg = d3.select("#container").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(zoom)
+            //.on("click", click)
+            //.append("g");
+        ;
+
+        g = svg.append("g")
+            .on("click", click, true);
+
+
+        var filter = svg.append("defs")
+            .append("filter")
+            .attr("id", "grayscale")
+            .append("feColorMatrix")
+            .attr("type", "matrix")
+            .attr("values", "0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0");
+
+        // var filter = svg.append("defs")
+        //     .append("filter")
+        //     .attr("id", "grayscale")
+        //     .append("feGaussianBlur")
+        //     .attr("stdDeviation", 5);
+
+      //  alert(filter);
+
+    //     svg.append("filter")
+    //         .id("grayscale")
+    // <filter id="grayscale">
+    //         <feColorMatrix type="matrix" values="0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0"/>
+    //         </filter>
+    }
+
+    d3.json("world-topo-min.json", function (error, world) {
+
+        var countries = topojson.feature(world, world.objects.countries).features;
+
+        topo = countries;
+        draw(topo);
+
+    });
+
+    //
+    // function blur() {
+    //     alert(this.value);
+    //     filter.attr("stdDeviation", this.value / 5);
+    // }
+
+    function handleMouseOver() {
+        var mouse = d3.mouse(svg.node()).map(function (d) {
+            return parseInt(d);
+        });
+
+        tooltip.classed("hidden", false)
+            .attr("style", "left:" + (mouse[0] + offsetL) + "px;top:" + (mouse[1] + offsetT) + "px")
+            .html(this.__data__.properties.name);
+    }
+
+    function handleMouseOut() {
+        tooltip.classed("hidden", true);
+    }
+
+
+    function draw(topo) {
+
+        // svg.append("path")
+        //     .datum(graticule)
+        //     .attr("class", "graticule")
+        //     .attr("d", path);
+
+
+        g.append("path")
+            .datum({type: "LineString", coordinates: [[-180, 0], [-90, 0], [0, 0], [90, 0], [180, 0]]})
+            .attr("class", "equator")
+            .attr("d", path);
+
+
+        var country = g.selectAll(".country").data(topo);
+
+       // country.attr("filter", "url(#blur)");
+
+        country.enter().insert("path")
+            .attr("class", "country")
+            .attr("d", path)
+            .attr("id", function (d, i) {
+                return d.id;
+            })
+            .attr("title", function (d, i) {
+                return d.properties.name;
+            })
+            .attr("filter", "url(#grayscale)")
+            .style("fill", function (d, i) {
+                return d.properties.color;
+            })
+            .on("click", clicked)
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut);
+
+    }
+
+
+    function redraw() {
+        width = c.offsetWidth;
+        height = width / 2;
+        d3.select('svg').remove();
+        setup(width, height);
+        draw(topo);
+    }
+
+
+    // function zoomed() {
+    //     g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
+    //     // g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); // not in d3 v4
+    //     g.attr("transform", d3.event.transform); // updated for d3 v4
+    // }
+
+    function move() {
+
+       // t = d3.zoomTransform(zoom.node());
+        console.log(d3.event);
+
+        //var t = d3.event.translate;
+        var t = [d3.event.transform.x, d3.event.transform.y];
+
+        //var s = d3.event.scale;
+        var s = d3.event.transform.k;
+ //       zscale = s;
+        var h = height / 4;
+
+       // console.log(d3.event)
+
+        t[0] = Math.min(
+            (width / height) * (s - 1),
+            Math.max(width * (1 - s), t[0])
+        );
+
+        t[1] = Math.min(
+            h * (s - 1) + h * s,
+            Math.max(height * (1 - s) - h * s, t[1])
+        );
+
+        //zoom.translateBy(t);
+        g.attr("transform", "translate(" + t + ")scale(" + s + ")");
+
+
+        //adjust the country hover stroke width based on zoom level
+        d3.selectAll(".country").style("stroke-width", 1.5 / s);
+
+    }
+
+    var throttleTimer;
+
+    function throttle() {
+        window.clearTimeout(throttleTimer);
+        throttleTimer = window.setTimeout(function () {
+            redraw();
+        }, 200);
+    }
+
+
+    //geo translation on mouse click in map
+    function click() {
+      //  var latlon = projection.invert(d3.mouse(this));
+      //  console.log(latlon);
+    }
+
+    //
+
+    function handleGrid(cb) {
+        if (cb.checked) {
+            var datetime = document.getElementById('window').value;
+            // d3.json("data/flights?datetime=" + datetime, function (data) {
+            d3.json("data/grid", function (data) {
+                drawGrid(data, "red");
+            });
+        } else {
+            clearGrid("red");
+        }
+    }
+    function handleRedFlights(cb) {
+        if (cb.checked) {
+            var datetime = document.getElementById('window').value;
+            // d3.json("data/flights?datetime=" + datetime, function (data) {
+            d3.json("data/red", function (data) {
+                drawPlanes(data, "red");
+            });
+        } else {
+            clearPlanes("red");
+        }
+    }
+
+    function handleBlueFlights(cb) {
+        if (cb.checked) {
+            var datetime = document.getElementById('window').value;
+            //d3.json("data/flights?datetime=" + datetime, function (data) {
+            d3.json("data/blue", function (data) {
+                drawPlanes(data, "blue");
+            });
+        } else {
+            clearPlanes("blue");
+        }
+    }
+
+    function handleLines(cb) {
+        if (cb.checked) {
+            var datetime = document.getElementById('window').value;
+            //d3.json("data/flights?datetime=" + datetime, function (data) {
+            d3.json("data/lines", function (data) {
+                drawLines(data);
+            });
+        } else {
+            clearLines();
+        }
+    }
+
+
+
+    function transponder(cb) {
+        d3.json("data/single/" + cb.value, function (red) {
+            drawPlanes(red);
+            // Now use response to do some d3 magic
+        });
+    }
+
+
+    window.addEventListener("load", function () {
+        var now = new Date();
+        var year = now.getUTCFullYear();
+        var month = now.getUTCMonth() + 1;
+        var day = now.getUTCDate();
+        var hour = now.getUTCHours();
+        var minute = Math.floor(now.getUTCMinutes() / 5) * 5;
+        var localDatetime = year + "-" +
+            (month < 10 ? "0" + month.toString() : month) +
+            "-" +
+            (day < 10 ? "0" + day.toString() : day) +
+            "T" +
+            (hour < 10 ? "0" + hour.toString() : hour) +
+            ":" +
+            (minute < 10 ? "0" + minute.toString() : minute) +
+            ":00";
+        document.getElementById("window").value = localDatetime;
+    });
+
+    //
+
+    function drawPlanes(data, type) {
+
+        clearPlanes();
+
+        g.selectAll("circle." + type)
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("r", .6)
+            .attr("class", type)
+            .attr("name", function (d) {
+                return (d.properties != null) ? ((d.properties.callsign != null) ? d.properties.callsign : 'na') : null;
+            })
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            });
+    }
+
+    function clearPlanes(type) {
+        // alert( svg.selectAll("circle.red").size());
+        g.selectAll("circle." + type).remove();
+        g.selectAll("text." + type).remove();
+    }
+
+
+    function drawLines(data) {
+
+        clearLines();
+
+        g.selectAll("path.connection")
+            .data(data)
+            .enter().append("path")
+            .attr("d", path)
+            .attr("class", "connection");
+
+    }
+
+    function clearLines() {
+        g.selectAll("path.connection").remove();
+    }
+
+    function drawGrid(data) {
+
+        clearLines();
+
+        g.selectAll("path.grid")
+            .data(data)
+            .enter().append("path")
+            .attr("d", path)
+            .attr("class", "grid");
+
+    }
+
+    function clearGrid() {
+        g.selectAll("path.grid").remove();
+    }
+
+    var active = d3.select(null);
+
+    function clicked(d) {
+
+        console.log("clicked");
+
+        if (active.node() === this) return reset();
+        active.classed("active", false);
+        active = d3.select(this).classed("active", true);
+
+     //   console.log("clicked2");
+
+        var bounds = path.bounds(d),
+            dx = bounds[1][0] - bounds[0][0],
+            dy = bounds[1][1] - bounds[0][1],
+            x = (bounds[0][0] + bounds[1][0]) / 2,
+            y = (bounds[0][1] + bounds[1][1]) / 2,
+            scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
+            translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+        svg.transition()
+            .duration(750)
+            // .call(zoom.translate(translate).scale(scale).event); // not in d3 v4
+            .call( zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale) ); // updated for d3
+
+
+       // active = d3.select(null);
+    }
+
+    function reset() {
+        active.classed("active", false);
+        active = d3.select(null);
+
+        svg.transition()
+            .duration(750)
+            // .call( zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1) ); // not in d3 v4
+            .call( zoom.transform, d3.zoomIdentity ); // updated for d3 v4
+    }
+
+
+    function stopped() {
+        if (d3.event.defaultPrevented) d3.event.stopPropagation();
+    }
+
+</script>
+</body>
+</html>

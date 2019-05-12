@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<style>
+
+    .nation {
+        fill: #ddd;
+    }
+
+    .states {
+        fill: none;
+        stroke: #fff;
+        stroke-linejoin: round;
+    }
+
+    .hexagon {
+        stroke: #fff;
+    }
+
+    .red {
+        fill: #f00;
+    }
+
+    .blue {
+        fill: #00f;
+    }
+
+</style>
+<svg width="960" height="600"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script>
+
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    var parseDate = d3.timeParse("%x");
+
+    var color = d3.scaleTime()
+        .domain([new Date(1962, 0, 1), new Date(2006, 0, 1)])
+        .range(["black", "steelblue"])
+        .interpolate(d3.interpolateLab);
+
+    var hexbin = d3.hexbin()
+        .extent([[0, 0], [width, height]])
+        .radius(10);
+
+    var radius = d3.scaleSqrt()
+        .domain([0, 12])
+        .range([0, 10]);
+
+    // Per https://github.com/topojson/us-atlas
+    var projection = d3.geoAlbersUsa()
+        .scale(1280)
+        .translate([480, 300]);
+
+    var path = d3.geoPath();
+
+    var path2 = d3.geoPath(projection);
+
+
+//
+
+    d3.queue()
+        .defer(d3.json, "us-10m.v1.json")
+        .defer(d3.json, "data/blue")
+        .defer(d3.json, "data/red")
+        .defer(d3.json, "data/allLines")
+        .defer(d3.json, "data/grid")
+        .await(ready);
+
+    function ready(error, us, blue, red, lines, grid) {
+        if (error) throw error;
+
+
+        svg.append("path")
+            .datum(topojson.feature(us, us.objects.nation))
+            .attr("class", "nation")
+            .attr("d", path);
+
+        svg.append("path")
+            .datum(topojson.mesh(us, us.objects.states, function (a, b) {
+                return a !== b;
+            }))
+            .attr("class", "states")
+            .attr("d", path);
+
+        // svg.append("g")
+        //     .attr("class", "hexagon")
+        //     .selectAll("path")
+        //     .data(hexbin(walmarts).sort(function(a, b) { return b.length - a.length; }))
+        //     .enter().append("path")
+        //     .attr("d", function(d) { return hexbin.hexagon(radius(d.length)); })
+        //     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        //     .attr("fill", function(d) { return color(d3.median(d, function(d) { return +d.date; })); });
+
+        //svg.append("circle").attr("r",5).attr("transform", function() {return "translate(" + projection([-75,43]) + ")";});
+
+        var data = [
+            {
+                "latitude": 44.882763,
+                "longitude": -93.2104
+            },
+            {
+                "latitude": 26.396308,
+                "longitude": -120.848974,
+            },
+            {
+                "latitude": 44.384358,
+                "longitude": -120.848974
+            },
+            {
+                "latitude": 44.384358,
+                "longitude": -76.885444
+            },
+            {
+                "latitude": 49.384358,
+                "longitude": -76.885444
+            }
+        ];
+
+        // svg.selectAll("grids")
+        //     .data(grid)
+        //     .enter()
+        //     .append("path")
+        //     .attr("d", function (d) {
+        //         return "M0 0 L5 0 L5 5 L0 5 Z";
+        //     })
+        //     .attr("transform", function (d) {
+        //         return "translate(" + projection([d.longitude, d.latitude]) + ")";
+        //     })
+        //     .attr("style", "fill:none;stroke:purple;stroke-width:1");
+
+        svg.selectAll("grids")
+            .data(grid)
+            .enter().append("path")
+            .attr("d", path2)
+            .attr("style", "fill:none;stroke:purple;stroke-width:1");
+
+
+        svg.selectAll("circles.points.blue")
+            .data(blue)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "blue")
+            .attr("transform", function (d) {
+                return "translate(" + projection([d.longitude, d.latitude]) + ")";
+            });
+
+        svg.selectAll("circles.points.red")
+            .data(red)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "red")
+            .attr("transform", function (d) {
+                return "translate(" + projection([d.longitude, d.latitude]) + ")";
+            });
+
+
+        svg.selectAll("lines")
+            .data(lines)
+            .enter().append("path")
+            .attr("d", path2)
+            .attr("style", "file:none;stroke:rgb(0,255,0);stroke-width:1");
+
+
+
+        // svg.append("rect")
+        //     .attr("x", )
+        //
+        //
+        // <rect x="50" y="20" width="150" height="150"
+        // style="fill:blue;stroke:pink;stroke-width:5;fill-opacity:0.1;stroke-opacity:0.9" />
+        //
+        //     <svg height="210" width="500">
+        //     <polygon points="200,10 250,190 160,210" style="fill:lime;stroke:purple;stroke-width:1" />
+        //     </svg>
+        //
+
+        // svg.append("polygon")
+        //     .attr("points", "0,0 10,0 10,10 0,10")
+        //     .attr("style", "fill:lime;stroke:purple;stroke-width:1")
+        //     .attr("transform", "translate(" + projection([-75, 30]) + ")");
+
+        // var pp = projection(d);
+        //
+        // var circle = svgContainer.append("circle")
+        //     .attr("cx", -93.217)
+        //     .attr("cy", 44.880)
+        //     .attr("r", 20);
+        //
+        //
+        // var geoJSON = [
+        //     {
+        //         "type": "LineString",
+        //         "coordinates": [
+        //             [-73.84463693999993, 40.90475939500004],
+        //             [-73.84443733899991, 40.90423928800004],
+        //             [-73.84443555299993, 40.904234630000076],
+        //             [-73.84332154899994, 40.90397722300008]
+        //         ]
+        //     },
+        //     {
+        //         "type": "LineString",
+        //         "coordinates": [
+        //             [-80, 40],
+        //             [-90, 40],
+        //             [-90, 50],
+        //             [-0, 40.90397722300008]
+        //         ]
+        //     }
+        //
+        // ]
+        //
+        //
+        // svg.selectAll("path2")
+        //     .data(geoJSON)
+        //     .enter().append("path")
+        //     .attr("d", path2)
+        //     .attr("fill", "#999");
+
+    }
+
+
+    // function foo(d) {
+    //
+    // }
+
+    function typeWalmart(d) {
+        var p = projection(d);
+        d[0] = p[0], d[1] = p[1];
+        d.date = parseDate(d.date);
+        return d;
+    }
+
+</script>

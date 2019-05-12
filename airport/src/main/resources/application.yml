@@ -1,0 +1,33 @@
+
+application:
+  topics:
+    flights: flights
+    nearest-airport: nearest-airport
+    nearest-airport-count: nearest-airport-count
+    nearest-airport-agg: nearest-airport-agg
+    nearest-airport-agg-count: nearest-airport-agg-count
+  cleanup-on-start: true
+
+kafka:
+  bootstrap-servers: localhost:19092
+  schema-registry-url: http://localhost:8081
+  application-id: demo-streams
+
+logging:
+  level:
+    org.apache.kafka.clients: INFO
+    com.objectpartners: DEBUG
+
+server:
+  ssl:
+    enabled: false
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  jackson:
+    serialization:
+      # Write our timestamps more sensibly
+      write_dates_as_timestamps: false
+    default-property-inclusion: non_absent

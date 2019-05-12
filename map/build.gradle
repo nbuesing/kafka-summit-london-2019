@@ -1,0 +1,75 @@
+plugins {
+    id 'org.springframework.boot' version '2.0.7.RELEASE'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group = 'com.objectpartners.buesing'
+description = 'spring-boot-app'
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile project(':common')
+
+    compile group: 'org.springframework.boot', name: 'spring-boot'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+    compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+    compile group: 'org.springframework.boot', name: 'spring-boot-devtools'
+
+    compile group: 'org.springframework.kafka', name: 'spring-kafka'
+
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: kafka_version
+
+    compile group: 'org.apache.avro', name: 'avro', version: avro_version
+    compile group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluent_io_version
+    compile group: 'io.confluent', name: 'kafka-avro-serializer', version: kafka_avro_serializer_version
+    compile group: 'io.confluent', name: 'kafka-schema-registry-client', version: kafka_avro_serializer_version
+
+    compile group: 'com.netflix.feign', name: 'feign-core', version: feign_version
+    compile group: 'com.netflix.feign', name: 'feign-jackson', version: feign_version
+
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: apache_commons_version
+
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jackson_version
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jackson_version
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jackson_version
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jackson_version
+
+    compile group: 'commons-fileupload', name: 'commons-fileupload', version: commons_fileupload_version
+
+    compile group: 'com.univocity', name: 'univocity-parsers', version: univocity_parsers_version
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+
+}
+
+springBoot {
+    buildInfo()
+}
+
+bootRun {
+    jvmArgs = [
+            '-Xdebug',
+            '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5008',
+            "-Dspring.profiles.active=local"
+    ]
+}

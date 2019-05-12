@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="d3/d3.v4.min.js"></script>
+    <script src="d3/topojson.v2.min.js"></script>
+    <script>
+        var url = window.location.href.split('?')[0];
+        var urlParams = new URLSearchParams(window.location.search);
+
+        function handleClick(cb, className) {
+            var state = 'hidden';
+            if (cb.checked) {
+                state = 'visible';
+            }
+            var elements = document.getElementsByClassName(className);
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].style.visibility = state;
+            }
+        }
+
+    </script>
+</head>
+<body>
+<label><input type='checkbox' onclick='handleClick(this, "blue");'>Blue Team</label>
+<label><input type='checkbox' onclick='handleClick(this, "red");'>Red Team</label>
+<label><input type='checkbox' onclick='handleClick(this, "connection");'>Nearest Blue</label>
+<br/>
+<br/>
+<svg width="960" height="600"></svg>
+<script>
+
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    var projection = d3.geoAlbersUsa()
+        .scale(1280)
+        .translate([480, 300]);
+    var path = d3.geoPath();
+    var path2 = d3.geoPath(projection);
+
+    d3.queue()
+        .defer(d3.json, "us-10m.v1.json")
+        .defer(d3.json, "data/blue")
+        .defer(d3.json, "data/red")
+        .defer(d3.json, "data/lines")
+        .defer(d3.json, "data/grid")
+        .await(ready);
+
+    function ready(error, us, blue, red, lines, grid) {
+        if (error) throw error;
+
+
+        svg.append("path")
+            .datum(topojson.feature(us, us.objects.nation))
+            .attr("class", "nation")
+            .attr("d", path);
+
+        svg.append("path")
+            .datum(topojson.mesh(us, us.objects.states, function (a, b) {
+                return a !== b;
+            }))
+            .attr("class", "states")
+            .attr("d", path);
+
+
+        svg.selectAll("grids")
+            .data(grid)
+            .enter().append("path")
+            .attr("d", path2)
+            .attr("style", "fill:none;stroke:purple;stroke-width:1");
+
+        svg.selectAll("circles.points.blue")
+            .data(blue)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "blue")
+            .attr("name", function (d) {
+                return (d.properties != null) ? d.properties.callsign : null;
+            })
+            .attr("id", function (d) {
+                return (d.properties != null) ? d.properties.transponder : null;
+            })
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            });
+
+        svg.selectAll("circles.points.red")
+            .data(red)
+            .enter()
+            .append("circle")
+            .attr("r", 1)
+            .attr("class", "red")
+            .attr("name", function (d) {
+                return (d.properties != null) ? d.properties.callsign : null;
+            })
+            .attr("id", function (d) {
+                return (d.properties != null) ? d.properties.transponder : null;
+            })
+            .attr("transform", function (d) {
+                return "translate(" + projection(d.coordinates) + ")";
+            });
+
+        svg.selectAll("lines")
+            .data(lines)
+            .enter().append("path")
+            .attr("d", path2)
+            .attr("class", "connection");
+    }
+</script>
+</body>
+</html>

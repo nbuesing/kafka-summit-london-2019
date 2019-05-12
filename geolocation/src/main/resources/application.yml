@@ -1,0 +1,26 @@
+server:
+  port:
+    9080
+  ssl:
+    enabled: false
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  jackson:
+    serialization:
+      # Write our timestamps more sensibly
+      write_dates_as_timestamps: false
+    default-property-inclusion: non_absent
+
+info:
+  app:
+    encoding: FOO
+    java:
+      source: 1.8
+      target: 1.8
+
+logging:
+  level:
+    org.apache.kafka.clients: INFO

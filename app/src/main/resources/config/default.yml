@@ -1,0 +1,31 @@
+
+app:
+  foo: true
+
+spring:
+  data:
+    cassandra:
+      keyspaceName: springbootapp
+      port: 9042
+      connectionTimeoutMillis: 1000
+      readTimeoutMillisesconds: 5000
+      connectionRetryInMilliseconds: 2000
+      consistencyLevel: false
+
+      #slocalBalancyPOlicy=DCAwareRoundRobin
+      #reconnectionPolicy
+
+endpoints:
+  health:
+    sensitive: false
+
+info:
+  app:
+    encoding: FOO
+    java:
+      source: 1.8
+      target: 1.8
+
+management:
+  security:
+    enabled: false

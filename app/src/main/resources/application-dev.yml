@@ -1,0 +1,9 @@
+
+server:
+  port:
+    8443
+
+http:
+  port:
+     8080
+

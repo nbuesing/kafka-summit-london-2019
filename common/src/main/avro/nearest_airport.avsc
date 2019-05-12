@@ -1,0 +1,23 @@
+{
+  "namespace": "com.objectpartners.buesing.avro",
+  "name": "NearestAirport",
+  "type": "record",
+  "fields": [
+    {
+      "name": "airport",
+      "type": "string"
+    },
+    {
+      "name": "airportLocation",
+      "type": "com.objectpartners.buesing.avro.Location"
+    },
+    {
+      "name": "callsign",
+      "type": "string"
+    },
+    {
+      "name": "aircraftLocation",
+      "type": "com.objectpartners.buesing.avro.Location"
+    }
+  ]
+}
