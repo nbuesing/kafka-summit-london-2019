@@ -2,16 +2,6 @@
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-
-group = 'com.objectpartners.buesing'
-description = 'spring-boot-app'
-
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
     compile project(':common')
 

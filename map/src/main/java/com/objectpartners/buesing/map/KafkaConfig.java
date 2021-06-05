@@ -13,8 +13,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.AbstractMessageListenerContainer;
-import org.springframework.kafka.listener.config.ContainerProperties;
+import org.springframework.kafka.listener.ContainerProperties;
 
 import java.util.Map;
 
@@ -48,7 +47,7 @@ public class KafkaConfig {
 
         ContainerProperties containerProperties = factory.getContainerProperties();
 
-        containerProperties.setAckMode(AbstractMessageListenerContainer.AckMode.MANUAL);
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL);
 
         return factory;
     }
@@ -83,7 +82,7 @@ public class KafkaConfig {
 
         ContainerProperties containerProperties = factory.getContainerProperties();
 
-        containerProperties.setAckMode(AbstractMessageListenerContainer.AckMode.MANUAL);
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL);
 
 
 
@@ -120,7 +119,7 @@ public class KafkaConfig {
 
         ContainerProperties containerProperties = factory.getContainerProperties();
 
-        containerProperties.setAckMode(AbstractMessageListenerContainer.AckMode.MANUAL);
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL);
 
 
         return factory;

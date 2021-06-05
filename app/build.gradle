@@ -27,6 +27,8 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-devtools'
     compile group: 'org.springframework.kafka', name: 'spring-kafka'
 
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+
     compile group: 'org.apache.avro', name: 'avro', version: avro_version
 
     compile group: 'org.apache.kafka', name: 'connect-api', version: kafka_version

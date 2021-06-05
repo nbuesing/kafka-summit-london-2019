@@ -3,23 +3,6 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
-//buildscript {
-//    dependencies {
-//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//        classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_version"
-//    }
-//}
-
-apply plugin: 'java'
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven {
-        url "http://packages.confluent.io/maven/"
-    }
-}
-
 
 dependencies {
 

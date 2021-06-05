@@ -2,13 +2,6 @@ apply plugin: 'com.commercehub.gradle.plugin.avro'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-group = 'com.objectpartners.buesing'
-description = 'streams'
-
-dependencies {
-    compile project(':common')
-}
-
 avro {
     createSetters = true
     fieldVisibility = "PRIVATE"
@@ -16,6 +9,10 @@ avro {
 }
 
 dependencies {
+    compile project(':common')
+
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+
     //spring dependencies leverages io.spring.dependency-management plugin for versions
     compile group: 'org.springframework.boot', name: 'spring-boot'
     compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
