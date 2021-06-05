@@ -23,12 +23,6 @@ dependencies {
 
     compile group: 'com.univocity', name: 'univocity-parsers', version: univocity_parsers_version
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
-
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
-
 }
 
 springBoot {

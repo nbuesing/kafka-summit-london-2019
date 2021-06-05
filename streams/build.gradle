@@ -1,12 +1,6 @@
-apply plugin: 'com.commercehub.gradle.plugin.avro'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-avro {
-    createSetters = true
-    fieldVisibility = "PRIVATE"
-
-}
 
 dependencies {
     compile project(':common')
@@ -30,8 +24,6 @@ dependencies {
     compile group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluent_io_version
     compile group: 'io.confluent', name: 'kafka-schema-registry-client', version: confluent_io_version
 
-    compile group: 'org.apache.avro', name: 'avro', version: avro_version
-    
     compile group: 'org.apache.commons', name: 'commons-lang3', version: apache_commons_version
 
     compile group: 'com.netflix.feign', name: 'feign-core', version: feign_version
@@ -43,11 +35,6 @@ dependencies {
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jackson_version
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: jackson_version
     
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
-
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
 }
 
 springBoot {

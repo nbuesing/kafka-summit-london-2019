@@ -1,20 +1,4 @@
-apply plugin: 'com.commercehub.gradle.plugin.avro'
-
-avro {
-    createSetters = true
-    fieldVisibility = "PRIVATE"
-}
-
 dependencies {
-    compile group: 'org.apache.avro', name: 'avro', version: avro_version
-
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
-
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
-
     testCompile group: 'junit', name: 'junit', version: junit_version
     testCompile group: 'org.spockframework', name: 'spock-core', version: spockframework_version
-
 }

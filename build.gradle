@@ -28,4 +28,31 @@ allprojects {
             url "https://packages.confluent.io/maven/"
         }
     }
+
+    dependencies {
+
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+
+        testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+        testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+
+    }
+
+}
+
+
+configure(subprojects.findAll { project -> file("${project.name}/src/main/avro").exists() }) {
+
+    apply plugin: 'com.commercehub.gradle.plugin.avro'
+
+    avro {
+        createSetters = true
+        fieldVisibility = "PRIVATE"
+    }
+
+    dependencies {
+        compile group: 'org.apache.avro', name: 'avro', version: avro_version
+    }
+
 }
