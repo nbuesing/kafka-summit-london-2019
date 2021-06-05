@@ -113,7 +113,7 @@ public class KafkaConfig {
   @Bean
   public KStream<String, Record> flightsSuppressed() {
     return flightsStore()
-               .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
+               .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()).withName("XX"))
                .toStream()
                .selectKey((k, v) -> k.key())
                .peek((k, v) -> log.info("flightSuppressed : key={}, value={}", k, v));

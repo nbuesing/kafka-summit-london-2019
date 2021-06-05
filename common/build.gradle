@@ -1,6 +1,4 @@
-plugins {
-    id 'com.commercehub.gradle.plugin.avro' version '0.9.0'
-}
+apply plugin: 'com.commercehub.gradle.plugin.avro'
 
 avro {
     createSetters = true

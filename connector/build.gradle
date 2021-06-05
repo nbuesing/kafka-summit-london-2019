@@ -17,7 +17,7 @@ dependencies {
 
     compile project(':common')
 
-    compile group: 'org.opensky', name: 'opensky-api', version: opensky_version
+   // compile group: 'org.opensky', name: 'opensky-api', version: opensky_version
 
     compile group: 'org.apache.kafka', name: 'connect-runtime', version: kafka_version
     compile group: 'org.apache.kafka', name: 'connect-api', version: kafka_version

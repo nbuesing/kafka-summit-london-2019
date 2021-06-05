@@ -34,11 +34,7 @@ public class JoinConsumer implements ConsumerSeekAware {
 
         if (record.value().getBlue() == null || record.value().getRed() == null
                 || record.value().getBlue().getLocation() == null
-                || record.value().getBlue().getLocation().getLatitude() == null
-                || record.value().getBlue().getLocation().getLongitude() == null
                 || record.value().getRed().getLocation() == null
-                || record.value().getRed().getLocation().getLatitude() == null
-                || record.value().getRed().getLocation().getLongitude() == null
         ) {
             log.warn("missing lat/long");
         } else {

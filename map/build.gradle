@@ -1,25 +1,9 @@
-plugins {
-    id 'org.springframework.boot' version '2.0.7.RELEASE'
-}
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 group = 'com.objectpartners.buesing'
 description = 'spring-boot-app'
-
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
 
 dependencies {
     compile project(':common')

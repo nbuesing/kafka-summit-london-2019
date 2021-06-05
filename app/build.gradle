@@ -1,31 +1,15 @@
-plugins {
-    id 'org.springframework.boot' version '2.0.4.RELEASE'
-    id 'com.commercehub.gradle.plugin.avro' version '0.9.0'
-}
+
+apply plugin: 'com.commercehub.gradle.plugin.avro'
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 group = 'com.objectpartners.buesing'
 description = 'spring-boot-app'
 
 dependencies {
     compile project(':common')
-}
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven {
-        url "http://packages.confluent.io/maven/"
-    }
 }
 
 avro {

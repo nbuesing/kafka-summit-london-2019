@@ -29,9 +29,7 @@ public class BlueConsumer implements ConsumerSeekAware {
         log.debug("offset={}, partition={}, key={}, value={}", record.offset(), record.partition(), record.key(), record.value());
 
 
-        if (record.value().getLocation() == null
-                || record.value().getLocation().getLatitude() == null
-                || record.value().getLocation().getLongitude() == null) {
+        if (record.value().getLocation() == null) {
             log.warn("missing lat/long");
         } else {
             dataService.addBlue(record.value());

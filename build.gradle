@@ -1,13 +1,21 @@
 
 
+plugins {
+    id 'idea'
+    id 'com.commercehub.gradle.plugin.avro' apply false
+    id 'org.springframework.boot' version '2.0.8.RELEASE' apply false
+}
+
+
+
 allprojects {
 
     apply plugin: 'java'
     apply plugin: 'groovy'
     apply plugin: 'idea'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
     idea{
         module{
@@ -21,7 +29,7 @@ allprojects {
         mavenCentral()
         mavenLocal()
         maven {
-            url "http://packages.confluent.io/maven/"
+            url "https://packages.confluent.io/maven/"
         }
     }
 }

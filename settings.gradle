@@ -1,8 +1,27 @@
+
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.commercehub.gradle.plugin:gradle-avro-plugin:0.21.0'
+    }
+}
+
+
 rootProject.name = 'blog'
 
 include 'common'
 include 'udf'
-include 'connector'
+//include 'connector'
 include 'geolocation'
 include 'map'
 include 'app'
